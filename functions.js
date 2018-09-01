@@ -1,12 +1,13 @@
 var hoffset = 20;
 var voffset = 20;
-var master = 'master';
 var flo = 'float';
 var lore = 'lore';
 var loremaster = 'loremaster';
 var saves = 'saves';
 var saving = 'saving';
 var edit = 'edit';
+var savesPanel = 'savesPanel';
+var savesVar = 'savesVar';
 var masterTextO = '<div id="master" onmousemove="managePosition(event);" onmouseout="reset();" ';
 var masterTextC = '</div>';
 var close = '>';
@@ -16,6 +17,8 @@ var variables = [];
   
 function g(id){return document.getElementById(id);}  
 function reset(){g(flo).style.display = 'none';g(flo).innerHTML = '';}
+function closeSaves(){g(savesPanel).style.display = 'none';}
+function showSaves(){g(savesPanel).style.display = 'inline-block';}
 function content(id){g(flo).innerHTML = '<pre>' + decodeURI(id) + '</pre>';}
 function addSaving(t){g(saving).innerHTML += '<div><pre>' + t + '</pre></div>';}
 function resetSaving(){g(saving).innerHTML = '';}
@@ -41,19 +44,24 @@ function managePosition(event){
   g(flo).style.display = 'block';
 }
 
-
-//https://stackoverflow.com/questions/4714192/insert-text-before-and-after-selection-in-textarea-with-javascript
 function roll(){
   var glore = g(lore);
   var text = glore.value.substr(glore.selectionStart, (glore.selectionEnd - glore.selectionStart));
-  //var variable;
   
   do{
     variable = prompt("Enter var name:", "");
   }while(variable == null || variable == "");
   
+  showSaves();
+  
+  if(findVariable(variable)){
+    g(saves).value = eval("v_" + variable);
+  }
+  
+  g(savesVar).value = variable;
+  
   glore.value = glore.value.substr(0, glore.selectionStart) + '[[onmouseover="content(v_' + variable + ');"]' + text + "]] " + glore.value.substr(glore.selectionEnd);
-  //g(saves).value = g(saves).value + "\n" + variable + " = ";
+  
   convert();
 }
 
@@ -75,36 +83,23 @@ function format(glore, text, fmt){
 }
 
 function convert(){
-  //load();
   var text = g(lore).value.replace(/\</g, "&lt;").replace(/\>/g, "&gt;").replace(/\[\[/g, masterTextO).replace(/\]\]/g, masterTextC).replace(/\]/g, close).replace(/\r\n/g, "<br />").replace(/\n/g, "<br />").replace(/~~b/g, "</b>").replace(/~b/g, "<b>").replace(/~~i/g, "</i>").replace(/~i/g, "<i>");
   g(loremaster).innerHTML = text;
 }
 
-/*function load(){
-  var text = g(saves).value;
-  var vars = text.split("\n");
-  var i = 0;
-  
-  resetSaving();
-  
-  for(i = 0;i < vars.length;i++){
-    eval(vars[i]);
-    addSaving(vars[i]);
-  }
-}*/
-
 function addVar(){
   eval("v_" + variable + " = '" + encodeURI(g(saves).value) + "'");
   
-  if(!findVariable(variable)){
+  if(findVariable(variable) === true){
+    loadSavings();
+  }else{
     addSaving("v_" + variable + " {" + g(saves).value + "};");
     variables.push("v_" + variable);
-  }else{
-    loadSavings();
   }
   
   g(saves).value = '';
   variable = '';
+  closeSaves();
 }
 
 function findVariable(variable){
