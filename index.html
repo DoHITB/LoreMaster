@@ -4,7 +4,7 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/DoHITB/LoreMaster/master/style.css">
   </head>
   <body>
-    <div class="viewEdit">
+    <div class="viewEdit" id="viewEdit">
       <div>
         <input type="button" value="View" onclick="_view();" />
         <input type="button" value="Edit" onclick="_edit();" />
@@ -36,6 +36,9 @@
       <div id="saving"></div>
       <div id="float"></div>
     </div>
-    <script type="text/javascript">reset();closeSaves();</script>
+    <div id="init">
+      <script type="text/javascript">reset();closeSaves();</script>
+    </div>
+    <div id="extra"></div>
   </body>
   </html>
