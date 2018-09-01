@@ -8,6 +8,10 @@ var saving = 'saving';
 var edit = 'edit';
 var savesPanel = 'savesPanel';
 var savesVar = 'savesVar';
+var viewEdit = 'viewEdit';
+var viewDiv = 'view';
+var init = 'init';
+var extra = 'extra';
 var masterTextO = '<div id="master" onmousemove="managePosition(event);" onmouseout="reset();" ';
 var masterTextC = '</div>';
 var close = '>';
@@ -24,6 +28,7 @@ function addSaving(t){g(saving).innerHTML += '<div><pre>' + t + '</pre></div>';}
 function resetSaving(){g(saving).innerHTML = '';}
 function _view(){g(edit).style.display = 'none';}
 function _edit(){g(edit).style.display = 'initial';};
+function clearDump(){g(extra).innerHTML = '';};
 
 function managePosition(event){
   var dot, eventDoc, doc, body, pageX, pageY;
@@ -125,22 +130,39 @@ function loadSavings(){
 }
 
 function _export(){
-  var grt1 = g(saves).value.split("\n");
-  var grt2 = g(lore).value.split("\n");
-  var i = 0;
+  var html = [];
   
-  for(i = 0;i < grt1.length;i++){
-    grt1[i] += "\n";
-  }
+  dumpVars();
   
-  for(i = 0;i < grt2.length;i++){
-    grt2[i] += "\n";
-  }
+  html.push("<html>\n");
+  html.push("<head><title>D&D Loremaster</title></head>\n");
+  html.push("<script src=\"https://cdn.rawgit.com/DoHITB/LoreMaster/master/functions.js\" type=\"text/javascript\"></script" + close + "\n");
+  html.push("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.rawgit.com/DoHITB/LoreMaster/master/style.css\">\n");
+  html.push("</head>\n");
+  html.push("<body>\n");
+  html.push("<div class=\"viewEdit\" id=\"viewEdit\">\n");
+  html.push(g(viewEdit).innerHTML + "\n");
+  html.push("</div>\n");
+  html.push("<div class=\"editable\" id=\"edit\">\n");
+  html.push(g(edit).innerHTML + "\n");
+  html.push("</div>\n");
+  html.push("<div class=\"lore\" id=\"view\">\n");
+  html.push(g(viewDiv).innerHTML + "\n");
+  html.push("</div>\n");
+  html.push("<div id=\"init\">\n");
+  html.push(g(init).innerHTML + "\n");
+  html.push("</div>\n");
+  html.push("<div id=\"extra\">\n");
+  html.push(g(extra).innerHTML + "\n");
+  html.push("</div>\n");
+  html.push("</body>\n");
+  html.push("</html>\n");
   
   var date = Date.now();
   
-  this.dlf(new Blob(grt1,{type:'text/plain'}), "saves_" + date);
-  this.dlf(new Blob(grt2,{type:'text/plain'}), "lore_" + date);
+  this.dlf(new Blob(html,{type:'text/html'}), "loremaster_" + date);
+  
+  clearDump();
 }
 
 function dlf(b, n){
@@ -148,9 +170,34 @@ function dlf(b, n){
 	dlfr.onload=function(event){dlfs=document.createElement('a');
 							  dlfs.href = event.target.result;
 								dlfs.target = '_blank';
-								dlfs.download = n + '.txt';
+								dlfs.download = n + '.html';
 								dlfc=new MouseEvent('click',{'view':window,'bubbles':true,'cancelable':true});
 								dlfs.dispatchEvent(dlfc);
 								(window.URL||window.webkitURL).revokeObjectURL(dlfs.href)};
 	dlfr.readAsDataURL(b);
+}
+
+function dumpVars(){
+  var t = '<script type="text/javascript">\n';
+  var dvi = 0;
+  
+  for(dvi = 0;dvi < variables.length;dvi++){
+    t += 'var ' + variables[dvi] + ' = "' + eval(variables[dvi]).replace(/"/g, '\\"') + '";\n';
+  }
+  
+  t += 'g(lore).value = "' + g(lore).value.replace(/"/g, '\\"') + '"\n';
+  t += 'variables = [';
+  
+  for(dvi = 0;dvi < variables.length;dvi++){
+    t += '"' + variables[dvi] + '"';
+    
+    if(dvi > variables.length){
+      t += ', ';
+    }
+  }
+  
+  t += ']';
+  
+  t += '</script' + close;
+  g(extra).innerHTML = t;
 }
