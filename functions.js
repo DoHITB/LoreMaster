@@ -179,13 +179,21 @@ function dlf(b, n){
 
 function dumpVars(){
   var t = '<script type="text/javascript">\n';
+  var aux = g(lore).value.replace(/"/g, '\\"').split("\n");
   var dvi = 0;
   
   for(dvi = 0;dvi < variables.length;dvi++){
     t += 'var ' + variables[dvi] + ' = "' + eval(variables[dvi]).replace(/"/g, '\\"') + '";\n';
   }
   
-  t += 'g(lore).value = "' + g(lore).value.replace(/"/g, '\\"') + '"\n';
+  t += 'var aux = "";\n';
+  
+  for(dvi = 0;dvi < aux.length;dvi++){
+    t += 'aux += "' + aux[dvi] + '\\n";\n'; 
+  }
+  
+  t += 'g(lore).value = aux;\n';
+  
   t += 'variables = [';
   
   for(dvi = 0;dvi < variables.length;dvi++){
